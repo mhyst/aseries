@@ -1,0 +1,28 @@
+cd ~/bin/series/titles
+for s in *
+do
+	echo "Buscando serie $s"
+	if test s != ".." -a s != "."
+	then
+		cd /home/julio/NAS/Download/transmission/completed
+		for a in *
+		do
+			if test a != ".." -a a != "."
+			then
+				if [[ $a == $s* ]]
+				then
+					if [[ -f "${a}" ]]
+					then
+						echo "Procesando $a"
+						dir=$(<"/home/julio/bin/series/titles/$s")
+						echo "Moviendo $a a $dir"
+						mkdir -p "${dir}"
+						mv "${a}" "${dir}"
+					fi
+				fi
+			fi
+		done
+		cd ~/bin/series/titles
+	fi
+done
+cd
