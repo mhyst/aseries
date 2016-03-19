@@ -15,7 +15,17 @@ Before opening it with your favourite text editor, you need to create some infor
 '''
 >The file name is case sensitive because it has to be compared with your download's files to see if a file is from such a series. The path is also case sensitive on some Operating Systems. Be aware of that.
 
->Notice that the path you need belongs to whatever filesystem your Transmission is running onto. Perhaps you are used to reach your files from here: ...~/NAS/transmission/completed/.... That is because the server has some shared folders and you can mount them in any point of your filesystem. Remember we are asking Transmission to move the file and update the torrent, so the path has to be relative to Transmission filesystem. I mean, if you have a server running Transmission, the path belongs to your server.
+>Notice that the path you need belongs to whatever filesystem your Transmission is running onto. Perhaps you are used to reach your files from here: ...~/NAS/transmission/completed/.... That is because the server has some shared folders and you can mount them in any point of your filesystem. Remember we are asking Transmission to move the file and update the torrent, so the path has to be relative to Transmission filesystem. I mean, if you have a server running Transmission, the path belongs to your server. If you don't know it, this command can help:
+
+'''
+transmission-remote server-ip:port --auth user:pass --torrent 1 --info | grep "Location:"
+'''
+
+>If that command doesn't show you anything, perhaps the torrent id 1 just doesn't exist. Try with other number. You can also see the torrent list with their ids:
+
+'''
+transmission-remote server-ip:port --auth user:pass -l
+'''
 
 This kind of files are like pointers and tell clat the series and the location you want the files of that series to be moved. Clat queries a folder to reach that kind of pointer files. So you need to have all of them on the same folder. This time, the folder has to be on your main computer's filesystem. Where to put the folder, you chose. All you have to do is modify the DIR variable inside the script to the path of your choice. You can have as many pointer files as you may need. But make sure there are no other files unrelated to clat in that very folder.
 
