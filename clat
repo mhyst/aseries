@@ -97,8 +97,8 @@ do
 			if test SERIES != ".." -a SERIES != "."; then
 				#Does it match the begining of TORRENT with SERIES?
 				if [[ $TORRENT == $SERIES* ]]; then
-					echo "Processing: $TORRENTID - $TORRENT"
-					echo ">>> Series: $SERIES"
+					#echo "Processing: $TORRENTID - $TORRENT"
+					#echo ">>> Series: $SERIES"
 					#Get the destination folder from the pointer's contents
 					MOVEDIR=$(<"$DIR$SERIES")
 					#Retrieve the current location of the file
@@ -116,8 +116,11 @@ do
 					#IS already the file where it's suposed to be?
 					if [[ $LOCATION == $MOVEDIR ]]; then
 						#There's no need to move the file
-						echo "The file is already in place"
+						#echo "The file is already in place"
+						printf "."
 					else
+						echo "Processing: $TORRENTID - $TORRENT"
+						echo ">>> Series: $SERIES"
 						#Moving the file
 						echo "Moving file to $MOVEDIR"
 						echo ">>> O->$LOCATION"
