@@ -1,5 +1,65 @@
 #!/bin/bash
 
+#Welcome to clat
+#
+#It stands for Classify Torrents.
+#It works together with Transmission working on a remote (or local network) computer.
+#
+#We usually download dozens of torrents that after some time we find very difficult
+#to know what we have there. This script allows you to move your downloaded files to other folders,
+#while still keeping them in touch with their original torrent and the tracker, 
+#accordong with some simple rules. Mainly it was created thinking in tv series. For example,
+#let's thing we have a dozen files named XZY S1E03. To make this script work you have to create
+#a folder container to add some files, I named here "pointers". Make sure the folder is not inside 
+#the main transmission download folder (i.e. /share/HDB_DATA/Downloads/transmission/complete). Putting
+#your files there will make the script not working. Now that is fixed, you have to create a file
+#inside the folder we just mentioned, named after the series. In this case XZY. I call this kind of 
+#files pointers because the content of the file points to the desired destination for your
+#downloads. You can create it with any text editor you fancy, but if you are on UNIX style OS,
+#like GNU/Linux, it is better to do this:
+#
+# echo "/share/HDB_DATA/Downloads/transmission/complete/series/XZY/" > XZY
+#
+# The final "/" on the path is mandatory.
+#
+#That command will do. If you read the path I just wrote, you perhaps come into account that
+#my Transmission server is a Network Attached Server (NAS). And that's how looks like my path.
+#This kind of systems do share automatically some folders from their disks. In this case
+#"Downloads". If you use, say, an old Netbook with GNU/Linux running Transmission, you will have
+#to take care of sharing the folders you need, via NFS or SAMBA. If you are working in such a
+#system, you may have done so already. Anyway, from your computer's point of view, the path where
+#you access your torrent downloads may and will look different than in the server. Something like
+#"~/NAS/Downloads/transmission/completed". For this script to work, you must specify server side
+#paths like the one I provided.
+#
+#Yours can look different if Transmission is not on a NAS. That's OK. If you just installed
+#Transmission on a server and you are unable to find out what is the main downloads path, I can help 
+#you. Here's a command you can use from your normal computer.
+#
+# transmission-remote server-ip:port --auth user:pass --torrent 1 --info | grep "Location:"
+#
+#If that show you nothing, try with other number instead of "1". You can do a -l to list
+#all your torrents. Like this:
+#
+# transmission-remote server-ip:port --auth user:pass -l
+#
+#Then get any id and use it with the previous command. I mean, if the first one didn't work.
+#Once you know that, make all paths you use relative to the one you found.
+#
+#You can have as many file pointers as you want. One for every series you have. All need to have the
+#same format I explained above. That is, named after the series (case sensitive) and the series folder's
+#path in the content.
+#
+#Once the files are ready, there's still some work to do. You have to tell clat the folder on your
+#computer that holds the pointers. Modify DIR variable to do inform clat about that. Also you need
+#to tell clat the ip address (or domain) of your Transmission server and its port. That information
+#can be found on the configuration menu of Transmission. Perhaps you need to change that configuration
+#to enable this function. Actually it's very easy. Put that info on SERVER variable. Keep the format
+#you see. On that very variable you need also to write the user and password you put on Transmission
+#config. This info is actually part of transmission-remote command and it is necessary to make it work.
+#
+#And that's it. Make no modification on the rest of the script if you don't know what you do.
+
 #Folder where the script can found the file pointers
 DIR=~/bin/series/titles/
 
@@ -26,50 +86,50 @@ do
     # if the torrent is "Stopped", "Finished", or "Idle after downloading 100%"
     if [ "$DL_COMPLETED" ] && [ "$STATE_STOPPED" ]; then
 
-	#Retrieve the filename to compare it with series pointers
-	FILENAME=`transmission-remote $SERVER --torrent $TORRENTID --info | grep "Name: "`
-	TORRENT=${FILENAME:8}
+		#Retrieve the filename to compare it with series pointers
+		FILENAME=`transmission-remote $SERVER --torrent $TORRENTID --info | grep "Name: "`
+		TORRENT=${FILENAME:8}
 
-	#Does it belong to a series?
-	for SERIES in *
-	do
-		#Make sure SERIES is not ".." or "."
-		if test SERIES != ".." -a SERIES != "."; then
-			#Does it match the begining of TORRENT with SERIES?
-			if [[ $TORRENT == $SERIES* ]]; then
-				echo "Processing: $TORRENTID - $TORRENT"
-				echo ">>> Series: $SERIES"
-				#Get the destination folder from the pointer's contents
-				MOVEDIR=$(<"$DIR$SERIES")
-				#Retrieve the current location of the file
-				P1LOCATION=`transmission-remote $SERVER --torrent $TORRENTID --info | grep "Location: "`
-				LOCATION="${P1LOCATION:12}" #Again we remove Location: with some initial spaces
-				#This is for trimmint the location. but I haven't observed extra spaces off limits.
-				#LOCATION=`echo "$P2LOCATION" | sed 's/^ *\(.*\) *$/\1/'`
-	
-				#If LOCATION doesn't ends with /, we add one
-				if [[ ${LOCATION: -1} != "/" ]]; then
+		#Does it belong to a series?
+		for SERIES in *
+		do
+			#Make sure SERIES is not ".." or "."
+			if test SERIES != ".." -a SERIES != "."; then
+				#Does it match the begining of TORRENT with SERIES?
+				if [[ $TORRENT == $SERIES* ]]; then
+					echo "Processing: $TORRENTID - $TORRENT"
+					echo ">>> Series: $SERIES"
+					#Get the destination folder from the pointer's contents
+					MOVEDIR=$(<"$DIR$SERIES")
+					#Retrieve the current location of the file
+					P1LOCATION=`transmission-remote $SERVER --torrent $TORRENTID --info | grep "Location: "`
+					LOCATION="${P1LOCATION:12}" #Again we remove Location: with some initial spaces
+					#This is for trimmint the location. but I haven't observed extra spaces off limits.
+					#LOCATION=`echo "$P2LOCATION" | sed 's/^ *\(.*\) *$/\1/'`
+		
+					#If LOCATION doesn't ends with /, we add one
+					if [[ ${LOCATION: -1} != "/" ]]; then
+						
+						LOCATION="$LOCATION/"
+					fi
 					
-					LOCATION="$LOCATION/"
-				fi
-				
-				#IS already the file where it's suposed to be?
-				if [[ $LOCATION == $MOVEDIR ]]; then
-					#There's no need to move the file
-					echo "The file is already in place"
-				else
-					#Moving the file
-					echo "Moving file to $MOVEDIR"
-					echo ">>> O->$LOCATION"
-					echo ">>> D->$MOVEDIR"
-					transmission-remote $SERVER --torrent $TORRENTID --move "$MOVEDIR"
-					echo ">>> Torrent $TORRENTID moved"
-					#echo "Removing torrent from list"
-					#transmission-remote $SERVER --torrent $TORRENTID --remove
+					#IS already the file where it's suposed to be?
+					if [[ $LOCATION == $MOVEDIR ]]; then
+						#There's no need to move the file
+						echo "The file is already in place"
+					else
+						#Moving the file
+						echo "Moving file to $MOVEDIR"
+						echo ">>> O->$LOCATION"
+						echo ">>> D->$MOVEDIR"
+						transmission-remote $SERVER --torrent $TORRENTID --move "$MOVEDIR"
+						echo ">>> Torrent $TORRENTID moved"
+						#echo "Removing torrent from list"
+						#transmission-remote $SERVER --torrent $TORRENTID --remove
+					fi
 				fi
 			fi
-		fi
-	done
+		done
     else
         echo "Torrent #$TORRENTID is not completed. Ignoring."
     fi
