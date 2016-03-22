@@ -60,14 +60,20 @@
 #
 #And that's it. Make no modification on the rest of the script if you don't know what you do.
 
-#Folder where the script can found the file pointers
+##########################################################
+## CONFIG VARS                                          ##
+##########################################################
+## Folder where the script can found the file pointers
 DIR=~/bin/series/titles/
-
-# port, username, password
+## port, username, password
 SERVER="192.168.1.10:9091 --auth admin:admin"
+##########################################################
+
+
+#Current version
+VERSION=0.1.5
 
 #Test if the user want's vervose mode
-
 VERBOSE=false
 if [[ $1 == "-v" ]]; then
 	VERBOSE=true
