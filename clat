@@ -79,6 +79,10 @@ if [[ $1 == "-v" ]]; then
 	VERBOSE=true
 fi
 
+echo "clat (Clasify Torrents) $VERSION - Copyleft (GPL v3) Julio Serrano 2016"
+echo "Helps you catalogins your series in folders accordingly"
+echo
+
 # use transmission-remote to get torrent list from transmission-remote list
 # use sed to delete first / last line of output, and remove leading spaces
 # use cut to get first field from each line

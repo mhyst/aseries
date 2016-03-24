@@ -1,3 +1,9 @@
+#!/bin/bash
+
+echo "aseries (Adjust Series) $VERSION - Copyleft (GPL v3) Julio Serrano 2016"
+echo "Automatically copies series files indicated folders - read clat script first"
+echo
+
 cd ~/bin/series/titles
 for s in *
 do
